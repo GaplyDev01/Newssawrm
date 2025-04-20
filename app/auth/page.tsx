@@ -3,7 +3,11 @@ import { createServerClient } from "@supabase/ssr"
 import { cookies } from "next/headers"
 import { redirect } from "next/navigation"
 
-export default async function AuthPage() {
+export default async function AuthPage({
+  searchParams,
+}: {
+  searchParams: { redirect?: string; error?: string }
+}) {
   const cookieStore = cookies()
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -28,9 +32,9 @@ export default async function AuthPage() {
     data: { user },
   } = await supabase.auth.getUser()
 
-  // If logged in, redirect to feed
+  // If logged in, redirect to feed or the requested page
   if (user) {
-    redirect("/feed")
+    redirect(searchParams.redirect || "/feed")
   }
 
   return (
@@ -57,6 +61,14 @@ export default async function AuthPage() {
         </div>
         <h1 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">CryptoIntel</h1>
         <p className="mt-2 text-slate-400">Stay ahead with personalized crypto news and insights</p>
+
+        {searchParams.error && (
+          <div className="mt-4 p-3 bg-red-900/50 border border-red-800 rounded-md text-red-200 text-sm">
+            {searchParams.error === "callback_error" && "Authentication failed. Please try again."}
+            {searchParams.error === "session_error" && "Failed to create session. Please try again."}
+            {!["callback_error", "session_error"].includes(searchParams.error) && searchParams.error}
+          </div>
+        )}
       </div>
 
       <div className="w-full max-w-md">

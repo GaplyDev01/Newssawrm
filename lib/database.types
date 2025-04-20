@@ -498,3 +498,5 @@ export type Tables<
   T extends keyof Database["public"]["Tables"],
   K extends keyof Database["public"]["Tables"][T]["Row"] = keyof Database["public"]["Tables"][T]["Row"]
 > = Database["public"]["Tables"][T]["Row"][K]
+
+export { Database }

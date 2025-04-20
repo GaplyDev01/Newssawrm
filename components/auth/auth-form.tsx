@@ -246,7 +246,11 @@ export function AuthForm() {
         throw error
       }
 
-      router.push("/feed")
+      // Get the redirect URL from the query parameters if it exists
+      const params = new URLSearchParams(window.location.search)
+      const redirectTo = params.get("redirect") || "/feed"
+
+      router.push(redirectTo)
       router.refresh()
     } catch (error: any) {
       toast({
@@ -266,6 +270,10 @@ export function AuthForm() {
       // Get the appropriate redirect URL for the current environment
       const redirectUrl = getRedirectUrl()
 
+      // Get the redirect path from the query parameters if it exists
+      const params = new URLSearchParams(window.location.search)
+      const redirectPath = params.get("redirect")
+
       console.log("OAuth redirect URL:", redirectUrl) // For debugging
       console.log("Current hostname:", window.location.hostname) // For debugging
 
@@ -278,6 +286,8 @@ export function AuthForm() {
             // Optional: Add a parameter to indicate this is a login attempt
             // This could be used in your callback route if needed
             prompt: "select_account",
+            // Pass the redirect path as a state parameter
+            ...(redirectPath ? { state: redirectPath } : {}),
           },
         },
       })

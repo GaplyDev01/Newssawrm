@@ -4,6 +4,17 @@ import type { NextRequest } from "next/server"
 
 export async function middleware(req: NextRequest) {
   const res = NextResponse.next()
+  const pathname = req.nextUrl.pathname
+
+  // Skip middleware for static assets and API routes
+  if (
+    pathname.startsWith("/_next") ||
+    pathname.startsWith("/static") ||
+    pathname.includes(".") ||
+    pathname.startsWith("/api/")
+  ) {
+    return res
+  }
 
   // Create a Supabase client for the middleware
   const supabase = createServerClient(
@@ -47,22 +58,27 @@ export async function middleware(req: NextRequest) {
     data: { session },
   } = await supabase.auth.getSession()
 
+  // Debug: Log session state and requested path
+  console.log(`Middleware: Path=${pathname}, Session=${!!session}`)
+
   // If no session and trying to access protected routes
   if (
     !session &&
-    (req.nextUrl.pathname.startsWith("/feed") ||
-      req.nextUrl.pathname.startsWith("/saved") ||
-      req.nextUrl.pathname.startsWith("/crypto") ||
-      req.nextUrl.pathname.startsWith("/alerts") ||
-      req.nextUrl.pathname.startsWith("/settings") ||
-      req.nextUrl.pathname.startsWith("/admin"))
+    (pathname.startsWith("/feed") ||
+      pathname.startsWith("/saved") ||
+      pathname.startsWith("/crypto") ||
+      pathname.startsWith("/alerts") ||
+      pathname.startsWith("/settings") ||
+      pathname.startsWith("/admin") ||
+      pathname.startsWith("/article"))
   ) {
     const redirectUrl = new URL("/auth", req.url)
+    redirectUrl.searchParams.set("redirect", pathname)
     return NextResponse.redirect(redirectUrl)
   }
 
   // If trying to access admin routes, check if user is admin
-  if (session && req.nextUrl.pathname.startsWith("/admin")) {
+  if (session && pathname.startsWith("/admin")) {
     // Get user profile to check role
     const { data: profile } = await supabase.from("profiles").select("role").eq("id", session.user.id).single()
 
@@ -73,8 +89,10 @@ export async function middleware(req: NextRequest) {
   }
 
   // If session and trying to access auth page
-  if (session && req.nextUrl.pathname.startsWith("/auth")) {
-    const redirectUrl = new URL("/feed", req.url)
+  if (session && pathname.startsWith("/auth")) {
+    // Check if there's a redirect parameter
+    const redirectTo = req.nextUrl.searchParams.get("redirect")
+    const redirectUrl = new URL(redirectTo || "/feed", req.url)
     return NextResponse.redirect(redirectUrl)
   }
 
@@ -82,13 +100,5 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: [
-    "/feed/:path*",
-    "/saved/:path*",
-    "/crypto/:path*",
-    "/alerts/:path*",
-    "/settings/:path*",
-    "/auth/:path*",
-    "/admin/:path*",
-  ],
+  matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
 }
