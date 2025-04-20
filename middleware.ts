@@ -54,10 +54,22 @@ export async function middleware(req: NextRequest) {
       req.nextUrl.pathname.startsWith("/saved") ||
       req.nextUrl.pathname.startsWith("/crypto") ||
       req.nextUrl.pathname.startsWith("/alerts") ||
-      req.nextUrl.pathname.startsWith("/settings"))
+      req.nextUrl.pathname.startsWith("/settings") ||
+      req.nextUrl.pathname.startsWith("/admin"))
   ) {
     const redirectUrl = new URL("/auth", req.url)
     return NextResponse.redirect(redirectUrl)
+  }
+
+  // If trying to access admin routes, check if user is admin
+  if (session && req.nextUrl.pathname.startsWith("/admin")) {
+    // Get user profile to check role
+    const { data: profile } = await supabase.from("profiles").select("role").eq("id", session.user.id).single()
+
+    // If not admin, redirect to feed
+    if (!profile || profile.role !== "admin") {
+      return NextResponse.redirect(new URL("/feed", req.url))
+    }
   }
 
   // If session and trying to access auth page
@@ -70,5 +82,13 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/feed/:path*", "/saved/:path*", "/crypto/:path*", "/alerts/:path*", "/settings/:path*", "/auth/:path*"],
+  matcher: [
+    "/feed/:path*",
+    "/saved/:path*",
+    "/crypto/:path*",
+    "/alerts/:path*",
+    "/settings/:path*",
+    "/auth/:path*",
+    "/admin/:path*",
+  ],
 }

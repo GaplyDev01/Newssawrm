@@ -1,9 +1,9 @@
-import { AuthForm } from "@/components/auth/auth-form"
+import { ResetPasswordForm } from "@/components/auth/reset-password-form"
 import { createServerClient } from "@supabase/ssr"
 import { cookies } from "next/headers"
 import { redirect } from "next/navigation"
 
-export default async function AuthPage() {
+export default async function ResetPasswordPage() {
   const cookieStore = cookies()
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -55,17 +55,21 @@ export default async function AuthPage() {
             </div>
           </div>
         </div>
-        <h1 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">CryptoIntel</h1>
-        <p className="mt-2 text-slate-400">Stay ahead with personalized crypto news and insights</p>
+        <h1 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">Reset Password</h1>
+        <p className="mt-2 text-slate-400">Enter your email to receive a password reset link</p>
       </div>
 
       <div className="w-full max-w-md">
-        <AuthForm />
+        <ResetPasswordForm />
       </div>
 
       <div className="mt-8 text-center text-sm text-slate-500">
-        <p>By signing up, you agree to our Terms of Service and Privacy Policy.</p>
-        <p className="mt-4">© {new Date().getFullYear()} CryptoIntel. All rights reserved.</p>
+        <p>
+          Remember your password?{" "}
+          <a href="/auth" className="text-blue-400 hover:text-blue-300">
+            Sign in
+          </a>
+        </p>
       </div>
     </div>
   )
