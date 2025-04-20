@@ -2,7 +2,17 @@
 
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
-import { LayoutDashboard, Newspaper, Database, Bell, Users, Settings, LogOut, Shield } from "lucide-react"
+import {
+  LayoutDashboard,
+  Newspaper,
+  Database,
+  Bell,
+  Users,
+  Settings,
+  LogOut,
+  Shield,
+  AlertTriangle,
+} from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { supabase } from "@/lib/supabase-client"
@@ -47,6 +57,12 @@ export function AdminSidebar() {
       icon: Users,
       href: "/admin/users",
       active: pathname === "/admin/users",
+    },
+    {
+      label: "Error Logs",
+      icon: AlertTriangle,
+      href: "/admin/logs",
+      active: pathname === "/admin/logs",
     },
     {
       label: "Settings",

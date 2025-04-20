@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { getRecommendationFeedbackStats } from "@/lib/actions/feedback-actions"
+import { getRecommendationFeedbackStats } from "@/app/actions/feedback"
 import { Star, ThumbsUp, CheckCircle, Loader2 } from "lucide-react"
 
 export function RecommendationFeedbackStats() {

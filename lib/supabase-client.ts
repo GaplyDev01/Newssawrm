@@ -1,7 +1,7 @@
 import { createBrowserClient } from "@supabase/ssr"
 import type { Database } from "./database.types"
 
-// Create a single instance of the Supabase client to be reused
+// Create a singleton instance to avoid multiple GoTrueClient instances
 let supabaseInstance: ReturnType<typeof createBrowserClient<Database>> | null = null
 
 export const createClient = () => {
@@ -17,3 +17,6 @@ export const createClient = () => {
 
 // Export a direct reference to the Supabase client for convenience
 export const supabase = createClient()
+
+// Also export as default for backward compatibility
+export default supabase

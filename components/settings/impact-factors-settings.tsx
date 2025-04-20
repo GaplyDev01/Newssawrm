@@ -22,11 +22,7 @@ import {
   Info,
 } from "lucide-react"
 import { defaultImpactFactors, type ImpactFactor } from "@/lib/types/impact-score"
-import {
-  saveImpactPreferences,
-  resetImpactPreferences,
-  getUserImpactPreferences,
-} from "@/lib/actions/impact-preferences-actions"
+import { saveImpactPreferences, resetImpactPreferences, getUserImpactPreferences } from "@/app/actions/impact"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 
 export function ImpactFactorsSettings() {

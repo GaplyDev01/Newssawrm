@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Search, UserCog, Shield, User } from "lucide-react"
 import { supabase } from "@/lib/supabase-client"
 import { useToast } from "@/components/ui/use-toast"
+import { updateUserRole } from "@/app/actions/admin/users"
 
 interface UserProfile {
   id: string
@@ -55,9 +56,11 @@ export function UserManagement({ initialUsers }: UserManagementProps) {
 
   const handleRoleChange = async (userId: string, newRole: string) => {
     try {
-      const { error } = await supabase.from("profiles").update({ role: newRole }).eq("id", userId)
+      const { error } = await updateUserRole(userId, newRole)
 
-      if (error) throw error
+      if (error) {
+        throw error
+      }
 
       // Update local state
       setUsers(users.map((user) => (user.id === userId ? { ...user, role: newRole } : user)))

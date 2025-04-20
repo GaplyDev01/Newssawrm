@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Pencil, Trash2, Eye, Search, Plus } from "lucide-react"
 import { supabase } from "@/lib/supabase-client"
 import { useToast } from "@/components/ui/use-toast"
-import { deleteArticle } from "@/lib/actions/article-actions"
+import { deleteArticle } from "@/app/actions/admin/articles"
 import { useRouter } from "next/navigation"
 
 type Article = {

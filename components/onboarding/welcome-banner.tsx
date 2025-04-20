@@ -5,12 +5,11 @@ import { X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { SetupWizardButton } from "@/components/onboarding/setup-wizard-button"
-import { createClient } from "@/lib/supabase-client"
+import { supabase } from "@/lib/supabase-client"
 
 export function WelcomeBanner() {
   const [isVisible, setIsVisible] = useState(false)
   const [hasConfiguredFactors, setHasConfiguredFactors] = useState(true)
-  const supabase = createClient()
 
   useEffect(() => {
     const checkUserPreferences = async () => {

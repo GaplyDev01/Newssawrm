@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Settings, ChevronDown, ChevronUp, Wand2 } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { calculatePersonalizedImpactScore } from "@/lib/impact-score"
-import { supabase } from "@/lib/supabase"
+import { supabase } from "@/lib/supabase-client"
 import { defaultImpactFactors } from "@/lib/types/impact-score"
 import { SetupWizardButton } from "@/components/onboarding/setup-wizard-button"
 

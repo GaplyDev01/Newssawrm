@@ -7,7 +7,7 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/componen
 import { Progress } from "@/components/ui/progress"
 import { useToast } from "@/components/ui/use-toast"
 import { defaultImpactFactors } from "@/lib/types/impact-score"
-import { saveImpactPreferences } from "@/lib/actions/impact-preferences-actions"
+import { saveImpactPreferences } from "@/app/actions/impact"
 import { ArrowLeft } from "lucide-react"
 import { WizardIntro } from "@/components/onboarding/wizard-intro"
 import { UserTypeSelection } from "@/components/onboarding/user-type-selection"

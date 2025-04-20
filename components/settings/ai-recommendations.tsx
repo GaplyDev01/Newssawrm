@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label"
 import { Slider } from "@/components/ui/slider"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { RecommendationFeedbackForm } from "./recommendation-feedback-form"
-import { generateRecommendationId } from "@/lib/actions/feedback-actions"
+import { generateRecommendationId } from "@/app/actions/feedback"
 import { toast } from "@/hooks/use-toast"
 
 export function AiRecommendations() {

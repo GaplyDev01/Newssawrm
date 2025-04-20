@@ -1,7 +1,5 @@
 "use server"
-
-import { createServerClient } from "@supabase/ssr"
-import { cookies } from "next/headers"
+import { makeClient } from "@/lib/serverClient"
 
 // Types for user segments
 export interface UserSegment {
@@ -33,24 +31,7 @@ export async function analyzeUserFeedbackPatterns(): Promise<{
   error?: string
 }> {
   try {
-    const cookieStore = cookies()
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          get(name: string) {
-            return cookieStore.get(name)?.value
-          },
-          set(name: string, value: string, options: any) {
-            cookieStore.set({ name, value, ...options })
-          },
-          remove(name: string, options: any) {
-            cookieStore.set({ name, value: "", ...options })
-          },
-        },
-      },
-    )
+    const supabase = makeClient()
 
     // Get all users with feedback
     const { data: feedbackData, error: feedbackError } = await supabase
@@ -125,24 +106,7 @@ export async function identifyUserSegments(): Promise<{
   error?: string
 }> {
   try {
-    const cookieStore = cookies()
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          get(name: string) {
-            return cookieStore.get(name)?.value
-          },
-          set(name: string, value: string, options: any) {
-            cookieStore.set({ name, value, ...options })
-          },
-          remove(name: string, options: any) {
-            cookieStore.set({ name, value: "", ...options })
-          },
-        },
-      },
-    )
+    const supabase = makeClient()
 
     // Get user feedback patterns
     const { success, patterns, error } = await analyzeUserFeedbackPatterns()
@@ -344,6 +308,26 @@ export async function identifyUserSegments(): Promise<{
       }
     }
 
+    // Cache the segments
+    await supabase
+      .from("admin_settings")
+      .upsert({
+        key: "user_segments",
+        value: formattedSegments,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("key", "user_segments")
+
+    // Update last segmentation time
+    await supabase
+      .from("admin_settings")
+      .upsert({
+        key: "last_segmentation",
+        value: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      })
+      .eq("key", "last_segmentation")
+
     return {
       success: true,
       segments: formattedSegments,
@@ -364,24 +348,7 @@ export async function getUserSegments(): Promise<{
   error?: string
 }> {
   try {
-    const cookieStore = cookies()
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          get(name: string) {
-            return cookieStore.get(name)?.value
-          },
-          set(name: string, value: string, options: any) {
-            cookieStore.set({ name, value, ...options })
-          },
-          remove(name: string, options: any) {
-            cookieStore.set({ name, value: "", ...options })
-          },
-        },
-      },
-    )
+    const supabase = makeClient()
 
     // Check if we need to recalculate segments
     const { data: lastSegmentation } = await supabase
@@ -397,15 +364,6 @@ export async function getUserSegments(): Promise<{
     if (!lastSegmentationTime || now.getTime() - lastSegmentationTime.getTime() > 24 * 60 * 60 * 1000) {
       const result = await identifyUserSegments()
 
-      // Update last segmentation time
-      await supabase
-        .from("admin_settings")
-        .upsert({
-          key: "last_segmentation",
-          value: now.toISOString(),
-        })
-        .eq("key", "last_segmentation")
-
       return result
     }
 
@@ -419,22 +377,12 @@ export async function getUserSegments(): Promise<{
     if (cachedSegments?.value) {
       return {
         success: true,
-        segments: JSON.parse(cachedSegments.value),
+        segments: cachedSegments.value,
       }
     }
 
     // If no cached segments, calculate them
     const result = await identifyUserSegments()
-
-    // Cache the results
-    await supabase
-      .from("admin_settings")
-      .upsert({
-        key: "user_segments",
-        value: JSON.stringify(result.segments),
-      })
-      .eq("key", "user_segments")
-
     return result
   } catch (error) {
     console.error("Error getting user segments:", error)
@@ -452,24 +400,7 @@ export async function getCurrentUserSegment(userId: string): Promise<{
   error?: string
 }> {
   try {
-    const cookieStore = cookies()
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          get(name: string) {
-            return cookieStore.get(name)?.value
-          },
-          set(name: string, value: string, options: any) {
-            cookieStore.set({ name, value, ...options })
-          },
-          remove(name: string, options: any) {
-            cookieStore.set({ name, value: "", ...options })
-          },
-        },
-      },
-    )
+    const supabase = makeClient()
 
     // Get user's segment ID from preferences
     const { data: userPrefs } = await supabase

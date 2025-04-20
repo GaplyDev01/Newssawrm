@@ -1,48 +1,33 @@
 "use server"
 
-import { generateEmbedding } from "@/lib/openai"
-import { createServerClient } from "@supabase/ssr"
-import { cookies } from "next/headers"
+import { vectorSearch } from "@/lib/vector-search"
+import { logErrorEvent, logInfoEvent } from "@/lib/error-logger"
 
-export async function searchArticles(query: string) {
+/**
+ * Server action to search for articles based on a query string
+ */
+export async function searchArticles(query: string, limit = 10) {
   try {
-    const cookieStore = cookies()
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          get(name: string) {
-            return cookieStore.get(name)?.value
-          },
-          set(name: string, value: string, options: any) {
-            cookieStore.set({ name, value, ...options })
-          },
-          remove(name: string, options: any) {
-            cookieStore.set({ name, value: "", ...options })
-          },
-        },
-      },
-    )
-
-    // Generate embedding for the search query
-    const embedding = await generateEmbedding(query)
-
-    // Use the match_articles function to find similar articles
-    const { data, error } = await supabase.rpc("match_articles", {
-      query_embedding: embedding,
-      match_threshold: 0.5, // Adjust this threshold as needed
-      match_count: 10, // Return top 10 results
-    })
-
-    if (error) {
-      console.error("Error searching articles:", error)
+    if (!query.trim()) {
       return []
     }
 
-    return data || []
+    // Log the search query
+    await logInfoEvent("Search performed", "searchArticles", {
+      query,
+      requestedLimit: limit,
+    })
+
+    // Use the vector search functionality
+    const results = await vectorSearch(query, {
+      limit,
+      maxResults: Math.max(20, limit * 2), // Fetch more results than needed to allow for filtering
+    })
+
+    return results
   } catch (error) {
-    console.error("Error in searchArticles:", error)
+    await logErrorEvent("Error in search", "searchArticles", error, { query, limit })
+    console.error("Search error:", error)
     return []
   }
 }

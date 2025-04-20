@@ -8,7 +8,7 @@ import { Progress } from "@/components/ui/progress"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { RelatedArticleCard } from "@/components/article/related-article-card"
 import { useRouter } from "next/navigation"
-import { getUserImpactPreferences } from "@/lib/actions/impact-preferences-actions"
+import { getUserImpactPreferences } from "@/app/actions/impact"
 
 interface ArticleModalProps {
   article: any

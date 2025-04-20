@@ -16,7 +16,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Calendar } from "@/components/ui/calendar"
 import { CalendarIcon, Loader2 } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { createArticle, updateArticle } from "@/lib/actions/article-actions"
+import { createArticle, updateArticle } from "@/app/actions/admin/articles"
 import { useToast } from "@/components/ui/use-toast"
 
 // Define the form schema

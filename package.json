@@ -62,6 +62,8 @@
     "@supabase/supabase-js": "latest",
     "openai": "latest",
     "@supabase/ssr": "latest",
+    "dotenv": "latest",
+    "timers": "latest",
     "uuid": "latest"
   },
   "devDependencies": {
