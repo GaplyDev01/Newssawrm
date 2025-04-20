@@ -43,7 +43,7 @@ export function ArticleHeader({ article }: ArticleHeaderProps) {
         <div className="flex items-center gap-2">
           {article.news_sources?.logo_url ? (
             <Image
-              src={article.news_sources.logo_url || "/placeholder.svg"}
+              src={article.news_sources.logo_url || "/placeholder.svg?height=32&width=32"}
               alt={article.news_sources.name}
               width={32}
               height={32}

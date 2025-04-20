@@ -11,8 +11,16 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { useRouter } from "next/navigation"
 
 export function FilterButton() {
+  const router = useRouter()
+
+  const handleFilterSelect = (filter: string, value: string) => {
+    // In a real app, this would apply filters to the current view
+    console.log(`Filter selected: ${filter}=${value}`)
+  }
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -26,24 +34,26 @@ export function FilterButton() {
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
           <DropdownMenuLabel className="text-xs">Impact</DropdownMenuLabel>
-          <DropdownMenuItem>High Impact</DropdownMenuItem>
-          <DropdownMenuItem>Moderate Impact</DropdownMenuItem>
-          <DropdownMenuItem>Low Impact</DropdownMenuItem>
+          <DropdownMenuItem onClick={() => handleFilterSelect("impact", "high")}>High Impact</DropdownMenuItem>
+          <DropdownMenuItem onClick={() => handleFilterSelect("impact", "moderate")}>Moderate Impact</DropdownMenuItem>
+          <DropdownMenuItem onClick={() => handleFilterSelect("impact", "low")}>Low Impact</DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
           <DropdownMenuLabel className="text-xs">Category</DropdownMenuLabel>
-          <DropdownMenuItem>Cryptocurrency</DropdownMenuItem>
-          <DropdownMenuItem>DeFi</DropdownMenuItem>
-          <DropdownMenuItem>NFTs</DropdownMenuItem>
-          <DropdownMenuItem>Regulation</DropdownMenuItem>
+          <DropdownMenuItem onClick={() => handleFilterSelect("category", "cryptocurrency")}>
+            Cryptocurrency
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => handleFilterSelect("category", "defi")}>DeFi</DropdownMenuItem>
+          <DropdownMenuItem onClick={() => handleFilterSelect("category", "nfts")}>NFTs</DropdownMenuItem>
+          <DropdownMenuItem onClick={() => handleFilterSelect("category", "ethereum")}>Ethereum</DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
           <DropdownMenuLabel className="text-xs">Time Period</DropdownMenuLabel>
-          <DropdownMenuItem>Today</DropdownMenuItem>
-          <DropdownMenuItem>This Week</DropdownMenuItem>
-          <DropdownMenuItem>This Month</DropdownMenuItem>
+          <DropdownMenuItem onClick={() => handleFilterSelect("time", "today")}>Today</DropdownMenuItem>
+          <DropdownMenuItem onClick={() => handleFilterSelect("time", "week")}>This Week</DropdownMenuItem>
+          <DropdownMenuItem onClick={() => handleFilterSelect("time", "month")}>This Month</DropdownMenuItem>
         </DropdownMenuGroup>
       </DropdownMenuContent>
     </DropdownMenu>

@@ -14,7 +14,9 @@ interface SearchResult {
   category: string | null
   tags: string[] | null
   impact_score: number
-  similarity: number
+  news_sources?: {
+    name: string | null
+  } | null
 }
 
 interface SearchResultsProps {
@@ -28,10 +30,6 @@ export function SearchResults({ results }: SearchResultsProps) {
     return "Low"
   }
 
-  const formatSimilarity = (similarity: number) => {
-    return `${Math.round(similarity * 100)}%`
-  }
-
   return (
     <div className="space-y-4">
       {results.map((result) => (
@@ -39,6 +37,7 @@ export function SearchResults({ results }: SearchResultsProps) {
           <CardHeader className="pb-2">
             <div className="flex justify-between items-start">
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                {result.news_sources?.name && <span>{result.news_sources.name}</span>}
                 {result.published_at && (
                   <span>
                     {formatDistanceToNow(new Date(result.published_at), {
@@ -46,8 +45,6 @@ export function SearchResults({ results }: SearchResultsProps) {
                     })}
                   </span>
                 )}
-                <span>•</span>
-                <span>Match: {formatSimilarity(result.similarity)}</span>
               </div>
               <Badge
                 variant={
@@ -62,13 +59,9 @@ export function SearchResults({ results }: SearchResultsProps) {
               </Badge>
             </div>
             <CardTitle className="text-xl mt-1">
-              {result.url ? (
-                <Link href={result.url} target="_blank" className="hover:underline">
-                  {result.title}
-                </Link>
-              ) : (
-                result.title
-              )}
+              <Link href={`/article/${result.id}`} className="hover:underline">
+                {result.title}
+              </Link>
             </CardTitle>
           </CardHeader>
           <CardContent>

@@ -34,7 +34,11 @@ export function ImpactAnalysis({ article }: ImpactAnalysisProps) {
 
         <div className="pt-2">
           <p className="text-sm text-muted-foreground mb-2">
-            This article has a high impact score, indicating it may require immediate attention.
+            {marketImpact >= 80
+              ? "This article has a high impact score, indicating it may require immediate attention."
+              : marketImpact >= 50
+                ? "This article has a moderate impact score and may be worth monitoring."
+                : "This article has a low impact score and is likely for informational purposes only."}
           </p>
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-1">

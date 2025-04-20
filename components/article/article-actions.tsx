@@ -1,11 +1,10 @@
 "use client"
 
-import { useState } from "react"
-import { Bookmark, Share2, ThumbsUp, MessageSquare } from "lucide-react"
+import { useState, useEffect } from "react"
+import { Bookmark, Share2, ThumbsUp } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useToast } from "@/components/ui/use-toast"
 import { supabase } from "@/lib/supabase-client"
-import { useReadingTracker } from "@/hooks/use-reading-tracker"
 
 interface ArticleActionsProps {
   article: any
@@ -16,18 +15,35 @@ export function ArticleActions({ article }: ArticleActionsProps) {
   const [isSaved, setIsSaved] = useState(false)
   const [isLiked, setIsLiked] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
+  const [userId, setUserId] = useState<string | null>(null)
 
-  // Initialize reading tracker
-  const { trackSave, trackShare, trackLike } = useReadingTracker({
-    articleId: article.id,
-  })
+  // Get the current user and check if article is saved
+  useEffect(() => {
+    const checkSavedStatus = async () => {
+      const { data } = await supabase.auth.getUser()
+      if (data.user) {
+        setUserId(data.user.id)
+
+        // Check if article is saved
+        const { data: savedArticle } = await supabase
+          .from("saved_articles")
+          .select("id")
+          .eq("user_id", data.user.id)
+          .eq("article_id", article.id)
+          .single()
+
+        setIsSaved(!!savedArticle)
+      }
+    }
+
+    checkSavedStatus()
+  }, [article.id])
 
   const handleSaveArticle = async () => {
     try {
       setIsSaving(true)
-      const { data: user } = await supabase.auth.getUser()
 
-      if (!user.user) {
+      if (!userId) {
         toast({
           title: "Authentication required",
           description: "Please sign in to save articles",
@@ -38,7 +54,14 @@ export function ArticleActions({ article }: ArticleActionsProps) {
 
       if (isSaved) {
         // Remove from saved
-        await supabase.from("saved_articles").delete().eq("user_id", user.user.id).eq("article_id", article.id)
+        await supabase.from("saved_articles").delete().eq("user_id", userId).eq("article_id", article.id)
+
+        // Track unsave event
+        await supabase.from("user_reading_events").insert({
+          user_id: userId,
+          article_id: article.id,
+          event_type: "unsave",
+        })
 
         toast({
           title: "Article removed",
@@ -47,12 +70,16 @@ export function ArticleActions({ article }: ArticleActionsProps) {
       } else {
         // Save article
         await supabase.from("saved_articles").insert({
-          user_id: user.user.id,
+          user_id: userId,
           article_id: article.id,
         })
 
         // Track save event
-        trackSave()
+        await supabase.from("user_reading_events").insert({
+          user_id: userId,
+          article_id: article.id,
+          event_type: "save",
+        })
 
         toast({
           title: "Article saved",
@@ -73,18 +100,26 @@ export function ArticleActions({ article }: ArticleActionsProps) {
     }
   }
 
-  const handleShareArticle = () => {
-    // Track share event
-    trackShare()
-
+  const handleShareArticle = async () => {
     if (navigator.share) {
-      navigator
-        .share({
+      try {
+        await navigator.share({
           title: article.title,
           text: article.summary || "Check out this article",
           url: window.location.href,
         })
-        .catch((error) => console.error("Error sharing:", error))
+
+        // Track share event
+        if (userId) {
+          await supabase.from("user_reading_events").insert({
+            user_id: userId,
+            article_id: article.id,
+            event_type: "share",
+          })
+        }
+      } catch (error) {
+        console.error("Error sharing:", error)
+      }
     } else {
       // Fallback for browsers that don't support the Web Share API
       navigator.clipboard.writeText(window.location.href)
@@ -95,10 +130,23 @@ export function ArticleActions({ article }: ArticleActionsProps) {
     }
   }
 
-  const handleLikeArticle = () => {
+  const handleLikeArticle = async () => {
+    if (!userId) {
+      toast({
+        title: "Authentication required",
+        description: "Please sign in to like articles",
+        variant: "destructive",
+      })
+      return
+    }
+
     // Track like event
     if (!isLiked) {
-      trackLike()
+      await supabase.from("user_reading_events").insert({
+        user_id: userId,
+        article_id: article.id,
+        event_type: "like",
+      })
     }
 
     setIsLiked(!isLiked)
@@ -134,13 +182,6 @@ export function ArticleActions({ article }: ArticleActionsProps) {
       >
         <ThumbsUp className="mr-2 h-4 w-4" />
         {isLiked ? "Liked" : "Like"}
-      </Button>
-
-      <Button variant="outline" size="sm" asChild>
-        <a href="#comments">
-          <MessageSquare className="mr-2 h-4 w-4" />
-          Comment
-        </a>
       </Button>
     </div>
   )

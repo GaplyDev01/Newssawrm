@@ -3,32 +3,43 @@ import { Badge } from "@/components/ui/badge"
 import { formatDistanceToNow } from "date-fns"
 import Link from "next/link"
 
-interface RecentArticlesProps {
-  articles: any[]
+interface ArticlePerformanceProps {
+  topArticles: any[]
+  articleViews: any[]
 }
 
-export function RecentArticles({ articles }: RecentArticlesProps) {
-  const getImpactLabel = (score: number) => {
-    if (score >= 80) return "High"
-    if (score >= 50) return "Moderate"
-    return "Low"
-  }
+export function ArticlePerformance({ topArticles, articleViews }: ArticlePerformanceProps) {
+  // Create a map of article IDs to view counts
+  const viewCountMap = articleViews.reduce(
+    (map, item) => {
+      map[item.article_id] = Number.parseInt(item.count)
+      return map
+    },
+    {} as Record<string, number>,
+  )
+
+  // Sort articles by view count
+  const sortedArticles = [...topArticles].sort((a, b) => {
+    const viewsA = viewCountMap[a.id] || 0
+    const viewsB = viewCountMap[b.id] || 0
+    return viewsB - viewsA
+  })
 
   return (
-    <Card>
+    <Card className="col-span-1">
       <CardHeader>
-        <CardTitle>Recent Articles</CardTitle>
-        <CardDescription>Latest articles added to the platform</CardDescription>
+        <CardTitle>Top Performing Articles</CardTitle>
+        <CardDescription>Articles with the highest view counts</CardDescription>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          {articles.length === 0 ? (
-            <p className="text-sm text-muted-foreground">No articles found</p>
+          {sortedArticles.length === 0 ? (
+            <p className="text-sm text-muted-foreground">No article data available</p>
           ) : (
-            articles.map((article) => (
-              <div key={article.id} className="flex items-center justify-between">
+            sortedArticles.slice(0, 5).map((article) => (
+              <div key={article.id} className="flex items-start justify-between">
                 <div className="space-y-1">
-                  <Link href={`/admin/articles/${article.id}`} className="font-medium hover:underline">
+                  <Link href={`/article/${article.id}`} className="font-medium hover:underline">
                     {article.title}
                   </Link>
                   <div className="flex items-center text-sm text-muted-foreground">
@@ -44,18 +55,8 @@ export function RecentArticles({ articles }: RecentArticlesProps) {
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
+                  <Badge variant="secondary">{viewCountMap[article.id] || 0} views</Badge>
                   {article.category && <Badge variant="outline">{article.category}</Badge>}
-                  <Badge
-                    variant={
-                      getImpactLabel(article.impact_score) === "High"
-                        ? "destructive"
-                        : getImpactLabel(article.impact_score) === "Moderate"
-                          ? "default"
-                          : "secondary"
-                    }
-                  >
-                    {getImpactLabel(article.impact_score)}
-                  </Badge>
                 </div>
               </div>
             ))
